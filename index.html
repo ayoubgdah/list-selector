@@ -1,0 +1,121 @@
+<html>
+  <head>
+    <title>List Selector</title>
+    <style>
+      .list-selector .ls-all li {
+        background: #eee;
+        cursor: pointer;
+      }
+      .list-selector .ls-selected li {
+        background: #0ff;
+        display: inline-block;
+        cursor: pointer;
+      }
+      .list-selector .hide, .list-selector .filtered {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="list-selector">
+      <input type="text" class="ls-filter">
+      <ul class="ls-selected"></ul>
+      <ul class="ls-all">
+        <li>Ayoub Gdah</li>
+        <li>Ivan Pusic</li>
+        <li>Marwane Jaakik</li>
+        <li>Abdellah Benhammou</li>
+        <li>Sara Jafghali</li>
+        <li>Omar Bougamza</li>
+      </ul>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script>
+      var listSelector = function() {
+        this.wrapper = arguments[0];
+        this.init();
+      };
+
+      listSelector.prototype = {
+        options: {
+          caseSensitive: false, // To do
+          emptyField: true,
+        },
+        init: function() {
+          this.filterField = this.wrapper.find(".ls-filter");
+          this.allList = this.wrapper.find(".ls-all");
+          this.selectedList = this.wrapper.find(".ls-selected");
+
+          this.bindEvents();
+        },
+        bindEvents: function() {
+
+          var self = this;
+
+          this.filterField.on("keyup", function(){
+            self.filterList();
+          });
+
+          this.allList.on("click", "li", function(){
+            self.addToSelected(this);
+          });
+
+          this.selectedList.on("click", "li", function(){
+            self.removeFromSelected(this);
+          });
+
+        },
+        filterList: function() {
+          var term = this.filterField.val().trim().toLowerCase();
+
+          this.allList.find("li").each(function(i, element){
+            var $element = $(element);
+            var value = $element.text().trim().toLowerCase();
+          
+            if( value.match(term) ) {
+              $element.removeClass("filtered");
+            } else {
+              $element.addClass("filtered");
+            }
+          });
+        },
+        addToSelected: function(element) {
+
+          $element = $(element);
+          var copy = $element.clone();
+          this.selectedList.append( copy );
+
+          $element.addClass("hide");
+
+          if( this.options.emptyField ) {
+            this.filterField.val("");
+            this.filterList();
+          }
+
+        },
+        removeFromSelected: function(element) {
+          var $element = $(element);
+
+          this.allList.find("li").each(function(i, node){
+            var $node = $(node);
+            if( $element.text() === $node.text() ) {
+              $node.removeClass("hide");
+              return;
+            }
+          });
+
+          $element.remove();
+        }
+      };
+
+      $.fn.listSelector = function() {
+        return new listSelector(this);
+      }
+
+      $(".list-selector").each(function(){
+        $(this).listSelector();
+      });
+    </script>
+  </body>
+</html>
